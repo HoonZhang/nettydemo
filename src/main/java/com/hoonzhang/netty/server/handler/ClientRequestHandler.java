@@ -3,6 +3,7 @@ package com.hoonzhang.netty.server.handler;
 import com.hoonzhang.netty.server.codec.packet.MsgPacket;
 import com.hoonzhang.netty.server.tasklet.Tasklet;
 import com.hoonzhang.netty.server.tasklet.TaskletFactoryUtils;
+import com.hoonzhang.netty.server.tasklet.TaskletUtils;
 import com.hoonzhang.netty.server.tasklet.WorkThreadPoolExcutorUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -25,6 +26,15 @@ public class ClientRequestHandler extends SimpleChannelInboundHandler<MsgPacket>
 //        ctx.writeAndFlush(resp);
 
         Tasklet tasklet = TaskletFactoryUtils.getTaskletFactory().create(msg, ctx);
-        WorkThreadPoolExcutorUtils.addTask(tasklet, msg);
+        if (tasklet != null) {
+            WorkThreadPoolExcutorUtils.addTask(tasklet, msg);
+        }
+
+/*        long t1 = System.currentTimeMillis();
+        int ret = tasklet.doNext(msg);
+        if (ret == 0) {
+            TaskletUtils.put(tasklet);
+        }
+        log.info("ret:{}, cost:{}, seq:{}", ret, System.currentTimeMillis() - t1, msg.getHead().getSeq());*/
     }
 }

@@ -28,6 +28,7 @@ public class Head implements Cloneable {
     public Head() {
         this.soh = HeadConstant.kHeadSoh;
         this.eot = HeadConstant.kHeadEot;
+        this.length = HeadConstant.kEmptyPacketLen;
     }
 
     @Override

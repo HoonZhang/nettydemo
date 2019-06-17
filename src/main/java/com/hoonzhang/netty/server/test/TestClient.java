@@ -1,4 +1,4 @@
-package com.hoonzhang.nettt.test;
+package com.hoonzhang.netty.server.test;
 
 import com.hoonzhang.netty.server.codec.decode.MsgPacketDecoder;
 import com.hoonzhang.netty.server.codec.encode.MsgPacketEncoder;
@@ -12,18 +12,33 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestClient {
     private static final Logger log = LoggerFactory.getLogger(TestClient.class);
 
+    private static AtomicInteger seqGenerator = new AtomicInteger();
+
+    private static int count = 0;
+
+    synchronized private static void addCount() {
+        ++count;
+    }
+
     public static void main(String[] args) {
         long t1 = System.currentTimeMillis();
-        log.info("------------ client start, t1={}", t1);
 
         String ip = "127.0.0.1";
         int port = 10086;
-        int threadSize = 100;
-        CountDownLatch latch = new CountDownLatch(threadSize);
+        int threadSize = 10;
+
+        if (args.length == 1) {
+            threadSize = Integer.parseInt(args[0]);
+        }
+
+        log.info("------------ client start, t1={}, threadSize:{}", t1, threadSize);
+
+        final CountDownLatch latch = new CountDownLatch(threadSize);
 
         for (int i = 0; i < threadSize; ++i) {
             Thread thread = new Thread(() -> {
@@ -45,7 +60,7 @@ public class TestClient {
             log.error(e.getMessage(), e);
         }
 
-        log.info("------------client end, cost:{}", System.currentTimeMillis() - t1);
+        log.info("------------client end, cost:{}, count:{}", System.currentTimeMillis() - t1, count);
     }
 
     private static void send(String ip, int port) throws IOException {
@@ -56,6 +71,7 @@ public class TestClient {
 
         Head head = new Head();
         head.setCmd(101);
+        head.setSeq(seqGenerator.incrementAndGet());
 
         MsgPacket msg = new MsgPacket();
         msg.setHead(head);
@@ -70,7 +86,7 @@ public class TestClient {
         while (readLen < 20) {
             int len = in.read(buf, readLen, 1024);
             if (len <= 0) {
-                log.info("len=%d\n", len);
+                log.info("len={}\n", len);
                 break;
             }
             readLen += len;
@@ -79,10 +95,12 @@ public class TestClient {
         MsgPacket respMsg = new MsgPacket();
         MsgPacketDecoder.decode(buf, respMsg);
 //        System.out.println(respMsg);
-        log.info("read len={}", readLen);
+        log.info("read len={}, seq:{}", readLen, respMsg.getHead().getSeq());
 
         out.close();
         in.close();
         socket.close();
+
+        addCount();
     }
 }

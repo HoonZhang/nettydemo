@@ -16,7 +16,6 @@ public class MsgDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        log.info("------------- msg decode:");
         int readableLen = in.readableBytes();
         if (readableLen < HeadConstant.kEmptyPacketLen) {
             log.error("invalid readable len:{}", readableLen);
@@ -54,5 +53,6 @@ public class MsgDecoder extends ByteToMessageDecoder {
         msgPacket.setHead(head);
 
         out.add(msgPacket);
+        log.info("------------- msg decode end, seq:{}", head.getSeq());
     }
 }

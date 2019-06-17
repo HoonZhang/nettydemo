@@ -14,12 +14,12 @@ public class MsgEncoder extends MessageToByteEncoder<MsgPacket> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, MsgPacket msg, ByteBuf out) throws Exception {
-
+        int bodyLen = (msg.getBody() != null) ? msg.getBody().length : 0;
         Head head = msg.getHead();
-        int packetLen = HeadConstant.kEmptyPacketLen + (msg.getBody() != null ? msg.getBody().length : 0);
+        int packetLen = HeadConstant.kEmptyPacketLen + bodyLen;
         if (packetLen != head.getLength()) {
             log.error("invalid length:{}", head.getLength());
-            return;
+//            return;
         }
 
         //开始字符
@@ -27,13 +27,13 @@ public class MsgEncoder extends MessageToByteEncoder<MsgPacket> {
 
         out.writeShort(head.getVersion());
 
-        out.writeInt(head.getLength());
+        out.writeInt(packetLen);
 
         out.writeInt(head.getCmd());
         out.writeInt(head.getSeq());
         out.writeInt(head.getErrorCode());
 
-        if (msg.getBody() != null) {
+        if (bodyLen > 0) {
             out.writeBytes(msg.getBody());
         }
 

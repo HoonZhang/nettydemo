@@ -2,6 +2,7 @@ package com.hoonzhang.netty.server.connection;
 
 import com.hoonzhang.netty.server.codec.handler.MsgDecoder;
 import com.hoonzhang.netty.server.codec.handler.MsgEncoder;
+import com.hoonzhang.netty.server.codec.packet.MsgPacket;
 import com.hoonzhang.netty.server.handler.ServerResponseHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -11,19 +12,25 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
+
 public class TcpConnection {
     private static final Logger log = LoggerFactory.getLogger(TcpConnection.class);
-    private String remoteIp;
-    private int remotePort;
 
     private ChannelFuture channelFuture;
+    private InetSocketAddress remoteSocketAddress;
 
     public TcpConnection(String remoteIp, int remotePort) {
-        this.remoteIp = remoteIp;
-        this.remotePort = remotePort;
+        this.remoteSocketAddress = new InetSocketAddress(remoteIp, remotePort);
+    }
+
+    public TcpConnection(InetSocketAddress remoteSocketAddress) {
+        this.remoteSocketAddress = remoteSocketAddress;
     }
 
     public void connect() {
@@ -41,8 +48,21 @@ public class TcpConnection {
             }
         });
 
-        channelFuture = bootstrap.connect(remoteIp, remotePort);
+        channelFuture = bootstrap.connect(remoteSocketAddress).addListener(new GenericFutureListener<Future<? super Void>>() {
+            @Override
+            public void operationComplete(Future<? super Void> future) throws Exception {
+                log.info("connect complete...");
+            }
+        });
+
+        channelFuture.awaitUninterruptibly();
 
         log.info("isDone={}, isSuccess={}", channelFuture.isDone(), channelFuture.isSuccess());
+    }
+
+    public int sendMsg(MsgPacket msg) {
+        log.info("isActive:{}, isOpen:{}", channelFuture.channel().isActive(), channelFuture.channel().isOpen());
+        channelFuture.channel().writeAndFlush(msg);
+        return 0;
     }
 }

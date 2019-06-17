@@ -5,10 +5,7 @@ import com.hoonzhang.netty.server.codec.handler.MsgEncoder;
 import com.hoonzhang.netty.server.handler.ClientRequestHandler;
 import com.hoonzhang.netty.server.tasklet.WorkThreadPoolExcutorUtils;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -38,7 +35,7 @@ public class NettyServer {
     }
 
     public void start() {
-        CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(1);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -63,14 +60,15 @@ public class NettyServer {
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(acceptorGroup, ioGroup);
         bootstrap.channel(NioServerSocketChannel.class);
+//        bootstrap.option(ChannelOption.)
         bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel socketChannel) throws Exception {
                 ChannelPipeline pipeline = socketChannel.pipeline();
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 3, 4, -7, 0));
-                pipeline.addLast(new MsgDecoder());
-                pipeline.addLast(new MsgEncoder());
-                pipeline.addLast(new ClientRequestHandler());
+                pipeline.addLast("MsgDecoder", new MsgDecoder());
+                pipeline.addLast("MsgEncoder", new MsgEncoder());
+                pipeline.addLast("ClientRequestHandler", new ClientRequestHandler());
             }
         });
         try {

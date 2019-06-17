@@ -17,11 +17,6 @@ public class WorkThread implements Runnable {
 
     @Override
     public void run() {
-        long t1 = System.currentTimeMillis();
-        int ret = tasklet.doNext(msg);
-        if (ret == 0) {
-            TaskletUtils.put(tasklet);
-        }
-        log.info("ret:{},  cost:{}", ret, System.currentTimeMillis() - t1);
+        TaskletUtils.execute(tasklet, msg);
     }
 }

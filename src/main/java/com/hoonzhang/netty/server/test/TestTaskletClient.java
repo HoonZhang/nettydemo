@@ -1,4 +1,4 @@
-package com.hoonzhang.nettt.test;
+package com.hoonzhang.netty.server.test;
 
 import com.hoonzhang.netty.server.codec.decode.MsgPacketDecoder;
 import com.hoonzhang.netty.server.codec.encode.MsgPacketEncoder;
