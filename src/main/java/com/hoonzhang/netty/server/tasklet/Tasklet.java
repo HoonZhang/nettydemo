@@ -7,6 +7,9 @@ public abstract class Tasklet {
     //当前step的seq
     private int seq;
     private int step;
+    protected long timestemp;
+    protected long createTimestamp;
+    protected long addTimestamp;
 
     private ChannelHandlerContext ctx;
 
@@ -15,6 +18,9 @@ public abstract class Tasklet {
     }
 
     public abstract int doNextStep(MsgPacket msg);
+
+    public void onExpire() {
+    }
 
     public int getSeq() {
         return seq;
@@ -30,5 +36,13 @@ public abstract class Tasklet {
 
     public void setStep(int step) {
         this.step = step;
+    }
+
+    public long getTimestemp() {
+        return timestemp;
+    }
+
+    public void setTimestemp(long timestemp) {
+        this.timestemp = timestemp;
     }
 }

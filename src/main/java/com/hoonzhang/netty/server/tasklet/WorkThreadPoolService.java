@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class WorkThreadPoolExcutorUtils {
-    private static final Logger log = LoggerFactory.getLogger(WorkThreadPoolExcutorUtils.class);
+public class WorkThreadPoolService {
+    private static final Logger log = LoggerFactory.getLogger(WorkThreadPoolService.class);
     private static ExecutorService executorService;
 
     public static void init(int threadSize) {
@@ -16,15 +16,18 @@ public class WorkThreadPoolExcutorUtils {
     }
 
     public static void addTask(MsgPacket msg) {
-        Tasklet tasklet = TaskletUtils.get(msg.getHead().getSeq());
+        Tasklet tasklet = TaskletUtils.getAndRemove(msg.getHead().getSeq());
 
         if (tasklet != null) {
+            log.info("tasklet={}, msg head:{}", tasklet, msg.getHead());
             addTask(tasklet, msg);
+        } else {
+            log.error("tasklet={}, msg head:{}", tasklet, msg.getHead());
         }
-        log.info("tasklet={}, msg head:{}", tasklet, msg.getHead());
     }
 
     public static void addTask(Tasklet tasklet, MsgPacket msg) {
+        tasklet.addTimestamp = System.currentTimeMillis();
         executorService.execute(new WorkThread(tasklet, msg));
     }
 

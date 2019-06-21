@@ -17,6 +17,12 @@ public class WorkThread implements Runnable {
 
     @Override
     public void run() {
-        TaskletUtils.execute(tasklet, msg);
+        long t1 = System.currentTimeMillis();
+        int ret = tasklet.doNextStep(msg);
+        long t2 = System.currentTimeMillis();
+        log.error("ret:{}, msgSeq:{}, taskletSeq:{}, taskletSize:{}, doDiff:{}, addDiff:{}, putDiff:{}, createDiff:{}",
+                ret, msg.getHead().getSeq(), tasklet.getSeq(), TaskletUtils.getSize(), t2 - t1,
+                t2 - tasklet.addTimestamp, t2 - tasklet.timestemp, t2 - tasklet.createTimestamp);
     }
+
 }

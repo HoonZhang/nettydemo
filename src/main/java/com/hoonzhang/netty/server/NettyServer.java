@@ -3,7 +3,7 @@ package com.hoonzhang.netty.server;
 import com.hoonzhang.netty.server.codec.handler.MsgDecoder;
 import com.hoonzhang.netty.server.codec.handler.MsgEncoder;
 import com.hoonzhang.netty.server.handler.ClientRequestHandler;
-import com.hoonzhang.netty.server.tasklet.WorkThreadPoolExcutorUtils;
+import com.hoonzhang.netty.server.tasklet.WorkThreadPoolService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -53,7 +53,7 @@ public class NettyServer {
     public void startServer(CountDownLatch latch) {
         log.info("start");
 
-        WorkThreadPoolExcutorUtils.init(workThreadPoolSize);
+        WorkThreadPoolService.init(workThreadPoolSize);
 
         EventLoopGroup acceptorGroup = new NioEventLoopGroup(acceptorThreadPoolSize);
         EventLoopGroup ioGroup = new NioEventLoopGroup(ioThreadPoolSize);

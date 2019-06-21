@@ -2,9 +2,8 @@ package com.hoonzhang.netty.server.handler;
 
 import com.hoonzhang.netty.server.codec.packet.MsgPacket;
 import com.hoonzhang.netty.server.tasklet.Tasklet;
-import com.hoonzhang.netty.server.tasklet.TaskletFactoryUtils;
-import com.hoonzhang.netty.server.tasklet.TaskletUtils;
-import com.hoonzhang.netty.server.tasklet.WorkThreadPoolExcutorUtils;
+import com.hoonzhang.netty.server.tasklet.TaskletFactory;
+import com.hoonzhang.netty.server.tasklet.WorkThreadPoolService;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
@@ -25,9 +24,9 @@ public class ClientRequestHandler extends SimpleChannelInboundHandler<MsgPacket>
 //        resp.getHead().setCmd(2);
 //        ctx.writeAndFlush(resp);
 
-        Tasklet tasklet = TaskletFactoryUtils.getTaskletFactory().create(msg, ctx);
+        Tasklet tasklet = TaskletFactory.getInstance().create(msg, ctx);
         if (tasklet != null) {
-            WorkThreadPoolExcutorUtils.addTask(tasklet, msg);
+            WorkThreadPoolService.addTask(tasklet, msg);
         }
 
 /*        long t1 = System.currentTimeMillis();

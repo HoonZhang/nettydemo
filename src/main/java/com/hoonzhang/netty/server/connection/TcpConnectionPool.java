@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Description:
- * @author: zhangxun@xiaomi.com
+ * @author: HoonZhang
  * @Creation Date: 2019-06-17 19:10
  * @ModificationHistory:
  * @Link:
@@ -22,6 +22,12 @@ public class TcpConnectionPool {
                     conn = new TcpConnection(socketAddress);
                     conn.connect();
                     connectionPool.put(socketAddress, conn);
+                }
+            }
+        } else if (!conn.isConnected()) {
+            synchronized (TcpConnectionPool.class) {
+                if (!conn.isConnected()) {
+                    conn.reconnect();
                 }
             }
         }

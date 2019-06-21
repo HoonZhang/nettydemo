@@ -33,6 +33,18 @@
             <version>${slf4j.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.14.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.xxmm</groupId>
+            <artifactId>zhibo-mis-stat</artifactId>
+            <version>0.0.4-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
     <build>

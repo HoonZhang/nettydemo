@@ -1,7 +1,7 @@
 package com.hoonzhang.netty.server.test;
 
 import com.hoonzhang.netty.server.NettyServer;
-import com.hoonzhang.netty.server.tasklet.TaskletFactoryUtils;
+import com.hoonzhang.netty.server.tasklet.TaskletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ public class TestServer {
 
         NettyServer nettyServer = new NettyServer(port, accThreadPoolSize, ioThreadPoolSize, workThreadPoosSize);
         nettyServer.start();
-        TaskletFactoryUtils.init(new TestTaskletFactory());
+        TaskletFactory.init(new TestTaskletFactory());
 
     }
 

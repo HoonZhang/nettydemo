@@ -4,13 +4,18 @@ import com.hoonzhang.netty.server.codec.packet.MsgPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TaskletUtils {
     private static final Logger log = LoggerFactory.getLogger(TaskletUtils.class);
 
+//    private static Object lock = new Object();
+
+    //    private static Map<Integer, Tasklet> tasklets = new HashMap<>();
     private static ConcurrentHashMap<Integer, Tasklet> tasklets = new ConcurrentHashMap<>();
 
     private static AtomicInteger seqGenerator = new AtomicInteger();
@@ -20,9 +25,24 @@ public class TaskletUtils {
             @Override
             public void run() {
                 while (true) {
-                    log.info("size:{}, tasklets:{}", tasklets.size(), tasklets);
+                    long curTime = System.currentTimeMillis();
+                    if (tasklets.size() > 0) {
+                        int i = 0;
+                        Iterator<Map.Entry<Integer, Tasklet>> itr = tasklets.entrySet().iterator();
+                        while (itr.hasNext()) {
+                            Map.Entry<Integer, Tasklet> entry = itr.next();
+                            if (curTime - entry.getValue().getTimestemp() > 3000) {
+                                entry.getValue().onExpire();
+                                log.error("remove i:{}, seq:{}, tasklet:{}", ++i, entry.getKey(), entry.getValue());
+                                itr.remove();
+                            }
+                        }
+                        if (tasklets.size() > 20) {
+                            log.error("taskletSize:{}", tasklets.size());
+                        }
+                    }
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(20);
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     }
@@ -32,20 +52,17 @@ public class TaskletUtils {
     }
 
     public static void put(Tasklet tasklet) {
+        tasklet.setTimestemp(System.currentTimeMillis());
         tasklets.put(tasklet.getSeq(), tasklet);
+        log.info("add tasklet, seq:{}", tasklet.getSeq());
     }
 
-    public static Tasklet get(int seq) {
+    public static Tasklet getAndRemove(int seq) {
         return tasklets.remove(seq);
     }
 
-    public static void execute(Tasklet tasklet, MsgPacket msg) {
-        long t1 = System.currentTimeMillis();
-        int ret = tasklet.doNextStep(msg);
-        if (ret == 0) {
-            TaskletUtils.put(tasklet);
-        }
-        log.info("ret:{}, cost:{}, seq:{}", ret, System.currentTimeMillis() - t1, msg.getHead().getSeq());
+    public static int getSize() {
+        return tasklets.size();
     }
 
     public static int getNextSeq() {
