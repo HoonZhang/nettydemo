@@ -62,7 +62,7 @@ public class TestTasklet2 extends Tasklet {
         final int seq = TaskletUtils.getNextSeq();
         this.setSeq(seq);
 
-        String url = "http://wtest-xxmm.yy.com/nav/dating";
+        String url = "http://www.baidu.com";
         Request request = new Request.Builder().url(url).build();
 
         final StatWatcher stat = new StatWatcher();
